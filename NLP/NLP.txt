@@ -1,0 +1,189 @@
+import pandas as pd
+import numpy as np
+import nltk
+import re
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.impute import SimpleImputer
+
+
+# Download stopwords
+nltk.download('stopwords')
+
+# Read in data
+data1 = pd.read_csv(CNN Train.csv,encoding='latin1')
+data2 = pd.read_csv(CNN Test.csv,encoding='latin1')
+df = pd.concat([data1, data2])
+
+# Clean Data
+df = df.drop(['id'], axis=1)
+df = df.reset_index(drop=True)
+
+data1 = data1.drop(['id'], axis=1)
+data1 = data1.reset_index(drop=True)
+data2 = data2.drop(['id'], axis=1)
+data2 = data2.reset_index(drop=True)
+
+#Removing duplicates from the dataframe
+
+data1.duplicated(subset= ['article', 'highlights']).sum()
+data1 = data1.drop_duplicates(subset= ['article', 'highlights'])
+
+data2.duplicated(subset= ['article', 'highlights']).sum()
+data2 = data2.drop_duplicates(subset= ['article', 'highlights'])
+
+df.duplicated(subset= ['article', 'highlights']).sum()
+df = df.drop_duplicates(subset= ['article', 'highlights'])
+
+
+# Check for missing values in article column
+print(df['article'].isna().sum())
+df.dropna(axis=0,inplace=True)
+df = df.dropna(subset=['article'])
+
+# Handle missing values using SimpleImputer
+imp = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+df['article'] = imp.fit_transform(df[['article']])
+
+# Preprocessing
+corpus = []
+ps = PorterStemmer()
+for i in range(0, df.shape[0])
+    if i in df.index
+        review = re.sub('[^a-zA-Z]', ' ', df['article'][i])
+        review = review.lower()
+        review = review.split()
+        review = [ps.stem(word) for word in review if not word in set(stopwords.words('english'))]
+        review = ' '.join(review)
+        corpus.append(review)
+
+
+# Initialize CountVectorizer
+cv = CountVectorizer(max_features=2500) 
+
+# Generate feature matrix and target variable
+X = cv.fit_transform(corpus).toarray()
+y = df.iloc[, -1].values
+
+# ------------------------------------------------------------------------- #
+# ---------------------------- DECISION TREE ------------------------------ #
+# ------------------------------------------------------------------------- #
+
+from sklearn.tree import DecisionTreeClassifier
+
+classifier = DecisionTreeClassifier()
+
+from sklearn.model_selection import train_test_split
+
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.25,random_state=0)
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print(n################### TEST #1 ######################)
+print(################### DECISION TREE ######################n)
+
+from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(y_test,y_pred)
+
+print(cm)
+
+from sklearn.metrics import accuracy_score
+
+print(fAccuracy score {accuracy_score(y_test,y_pred)})
+
+
+
+# ------------------------------------------------------------------------- #
+# ------------------------- LOGISTIC REGRESSION --------------------------- #
+# ------------------------------------------------------------------------- #
+
+
+
+from sklearn.linear_model import LogisticRegression
+
+classifier = LogisticRegression()
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print(n################### TEST #2 ######################)
+print(################### LOGISTIC REGRESSION ######################n)
+
+print(cm)
+
+print(fnAccuracy score {accuracy_score(y_test,y_pred)})
+
+
+
+# ------------------------------------------------------------------------- #
+# --------------------------------- KNN ----------------------------------- #
+# ------------------------------------------------------------------------- #
+
+
+
+from sklearn.neighbors import KNeighborsClassifier
+
+classifier = KNeighborsClassifier(n_neighbors=5)
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print(n################### TEST #3 ######################)
+print(################### KNN ######################n)
+
+print(cm)
+
+print(fnAccuracy score {accuracy_score(y_test,y_pred)})
+
+
+
+# ------------------------------------------------------------------------- #
+# ----------------------------- NAIVE BAYES ------------------------------- #
+# ------------------------------------------------------------------------- #
+
+
+
+from sklearn.naive_bayes import GaussianNB
+
+classifier = GaussianNB()
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print(n################### TEST #4 ######################)
+print(################### NAIVE BAYES ######################n)
+
+print(cm)
+
+print(fnAccuracy score {accuracy_score(y_test,y_pred)})
+
+
+
+# ------------------------------------------------------------------------- #
+# ---------------------------- RANDOM FOREST ------------------------------ #
+# ------------------------------------------------------------------------- #
+
+
+
+from sklearn.ensemble import RandomForestClassifier
+
+classifier = RandomForestClassifier(n_estimators=5)
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print(n################### TEST #5 ######################)
+print(################### RANDOM FOREST ######################n)
+
+print(cm)
+
+print(fnAccuracy score {accuracy_score(y_test,y_pred)})
+

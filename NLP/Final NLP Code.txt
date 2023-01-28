@@ -1,0 +1,194 @@
+import pandas as pd
+import numpy as np
+import nltk
+import re
+from nltk.corpus import stopwords
+from nltk.stem.porter import PorterStemmer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+
+
+# Download stopwords
+nltk.download('stopwords')
+
+# Read in data
+data1 = pd.read_csv("CNN Train.csv",encoding='latin1')
+data2 = pd.read_csv("CNN Test.csv",encoding='latin1')
+df = pd.concat([data1, data2])
+
+# Clean Data
+df = df.drop(['id'], axis=1)
+df = df.reset_index(drop=True)
+
+
+data1 = data1.drop(['id'], axis=1)
+data1 = data1.reset_index(drop=True)
+data2 = data2.drop(['id'], axis=1)
+data2 = data2.reset_index(drop=True)
+
+#Removing duplicates from the dataframe
+data1.duplicated(subset= ['article', 'highlights']).sum()
+data1 = data1.drop_duplicates(subset= ['article', 'highlights'])
+
+data2.duplicated(subset= ['article', 'highlights']).sum()
+data2 = data2.drop_duplicates(subset= ['article', 'highlights'])
+
+df.duplicated(subset= ['article', 'highlights']).sum()
+df = df.drop_duplicates(subset= ['article', 'highlights'])
+
+
+# Check for missing values in article column
+print(df['article'].isna().sum())
+df.dropna(axis=0,inplace=True)
+df = df.dropna(subset=['article'])
+
+# Handle missing values using SimpleImputer
+imp = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
+df['article'] = imp.fit_transform(df[['article']])
+
+df = df.reset_index(drop=True)
+data1 = data1.reset_index(drop=True)
+
+# Preprocessing
+corpus = []
+ps = PorterStemmer()
+for i in range(0, df.shape[0]):
+    if i in df.index:
+        review = re.sub('[^a-zA-Z]', ' ', df['article'][i])
+        review = review.lower()
+        review = review.split()
+        review = [ps.stem(word) for word in review if not word in set(stopwords.words('english'))]
+        review = ' '.join(review)
+        corpus.append(review)
+
+
+# Initialize CountVectorizer
+cv = CountVectorizer(max_features=2500) 
+
+# Generate feature matrix and target variable
+X = cv.fit_transform(corpus).toarray()
+y = df.iloc[:, -1].values
+y = y.reshape(-1,1)
+
+print(X.shape, y.shape)
+
+
+# Split the data into training and test set
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# ------------------------------------------------------------------------- #
+# ---------------------------- DECISION TREE ------------------------------ #
+# ------------------------------------------------------------------------- #
+
+classifier = DecisionTreeClassifier()
+
+from sklearn.model_selection import train_test_split
+
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.25,random_state=0)
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print("\n################### TEST #1 ######################")
+print("################### DECISION TREE ######################\n")
+
+from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(y_test,y_pred)
+
+print(cm)
+
+print(f"\Accuracy score: {accuracy_score(y_test,y_pred)}")
+
+# ------------------------------------------------------------------------- #
+# --------------------------------- KNN ----------------------------------- #
+# ------------------------------------------------------------------------- #
+
+classifier = KNeighborsClassifier(n_neighbors=5)
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print("\n################### TEST #3 ######################")
+print("################### KNN ######################\n")
+
+print(cm)
+
+print(f"\nAccuracy score: {accuracy_score(y_test,y_pred)}")
+
+# ------------------------------------------------------------------------- #
+# ---------------------------- RANDOM FOREST ------------------------------ #
+# ------------------------------------------------------------------------- #
+
+classifier = RandomForestClassifier(n_estimators=5)
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print("\n################### TEST #5 ######################")
+print("################### RANDOM FOREST ######################\n")
+
+print(cm)
+
+print(f"\nAccuracy score: {accuracy_score(y_test,y_pred)}")
+
+# ------------------------------------------------------------------------- #
+# ------------------------- LOGISTIC REGRESSION --------------------------- #
+# ------------------------------------------------------------------------- #
+
+classifier = LogisticRegression()
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print("\n################### TEST #2 ######################")
+print("################### LOGISTIC REGRESSION ######################\n")
+
+print(cm)
+
+print(f"\nAccuracy score: {accuracy_score(y_test,y_pred)}")
+
+# ------------------------------------------------------------------------- #
+# ----------------------------- NAIVE BAYES ------------------------------- #
+# ------------------------------------------------------------------------- #
+
+
+
+from sklearn.naive_bayes import GaussianNB
+
+classifier = GaussianNB()
+
+classifier.fit(X_train,y_train)
+
+y_pred = classifier.predict(X_test)
+
+print("\n################### TEST #4 ######################")
+print("################### NAIVE BAYES ######################\n")
+
+print(cm)
+
+print(f"\nAccuracy score: {accuracy_score(y_test,y_pred)}")
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+associ press publish est octob updat est octob bishop fargo cathol dioces north 
+dakota expos potenti hundr church member fargo grand fork jamestown hepat viru 
+late septemb earli octob state health depart issu advisori exposur anyon attend 
+five church took communion bishop john folda pictur fargo cathol dioces north 
+dakota expos potenti hundr church member fargo grand fork jamestown hepat state 
+immun program manag molli howel say risk low offici feel import alert peopl possibl 
+exposur dioces announc monday bishop john folda take time diagnos hepat dioces 
+say contract infect contamin food attend confer newli ordain bishop itali last 
+month symptom hepat includ fever tired loss appetit nausea abdomin discomfort 
+fargo cathol dioces north dakota pictur bishop locat
