@@ -111,6 +111,7 @@ extractive and abstractive summarization, though the original version was create
 The CNN Daily Mail News Test Summarization Training Dataset consists of three columns: id,
 article, and highlights. Each row in the dataset represents a single text sample and itscorresponding
 summary.
+https://www.kaggle.com/datasets/gowrishankarp/newspaper-text-summarization-cnn-dailymail 
 
 • ID column
 • Article column
